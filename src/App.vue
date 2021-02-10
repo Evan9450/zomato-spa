@@ -1,13 +1,25 @@
 <template>
-  <div id="app">
-    <header>
-      <h1>Vue.js SPA</h1>
-    </header>
-    <main>
-      <aside class="sidebar">
-      </aside>
-      <div class="content">
-      </div>
-    </main>
-  </div>
+    <div>
+        <div>
+            <input v-model="search" placeholder="Restaurant" />
+            <button type="primary" @click="Search">搜索</button>
+        </div>
+    </div>
 </template>
+
+<script>
+import { mapGetters } from 'vuex';
+import axios from 'axios';
+
+export default {
+    data() {
+        return {
+            search: '',
+            list: [],
+            searchData: []
+        };
+    },
+
+    components: {}
+};
+</script>
