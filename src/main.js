@@ -1,9 +1,7 @@
-import Vue from 'vue';
-import App from './App.vue';
-import axios from 'axios';
+import Vue from 'vue'
+import App from './App.vue'
 
-Vue.use(axios);
 new Vue({
-    el: '#app',
-    render: h => h(App)
-});
+  el: '#app',
+  render: h => h(App)
+})

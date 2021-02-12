@@ -1,24 +1,26 @@
 <template>
     <div id="app">
         <div>
-            <input v-model="search" placeholder="Restaurant" @input="searchAction($event)" />
-            <button v-on:click.prevent="handleSearch">搜索</button>
-            <input type="checkbox" name="hobby" value="健身" />健身
+            <div :class="$style.wrapper">
+                <input v-model="search" placeholder="Restaurant" @input="searchAction($event)" />
+                <button v-on:click.prevent="handleSearch">搜索</button>
+            </div>
 
-            <div v-if="filterResult.length > 0" class="wrapper">
-                <div class="card" v-for="(res, index) in filterResult" :key="index">
+            <div v-if="filterResult.length > 0">
+                <div :class="$style.card" v-for="(res, index) in filterResult" :key="index">
                     <img v-bind:src="res.restaurant.thumb" />
                     {{ res.restaurant.name }}
                     <small>{{ res.restaurant.cuisines }}</small>
-                    <hr />
+                    <!-- <hr /> -->
                 </div>
             </div>
             <div v-else class="wrapper">
-                <div class="card" v-for="(res, index) in list" :key="index">
+                <div :class="$style.card" v-for="(res, index) in list" :key="index">
                     <img v-bind:src="res.restaurant.thumb" />
                     {{ res.restaurant.name }}
                     <small>{{ res.restaurant.cuisines }}</small>
-                    <hr />
+
+                    <!-- <hr /> -->
                 </div>
             </div>
         </div>
@@ -72,7 +74,7 @@ export default {
                             return res.data.restaurants;
                         })
                         .catch(function(error) {
-                            console.log(error);
+                            console.log('error');
                         });
 
                     return res_list;
@@ -92,22 +94,24 @@ export default {
                 if (resName.includes(inputValue)) {
                     return item;
                 }
+                // console.log(typeof resName.includes(inputValue));
             });
         },
 
         async handleSearch() {
             let result = await axios({
                 method: 'post',
-                url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}&p=${this.search}`,
+                url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}&q=${this.search}`,
                 // data: formData,
                 headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
             })
                 .then(response => {
-                    return response.data;
+                    return response.data.restaurants;
                 })
                 .catch(res => {
                     console.log(res);
                 });
+            // console.log(result);
             return (this.list = result);
         }
     }
@@ -125,8 +129,25 @@ body {
     margin-bottom: 16px;
 }
 
+.wrapper {
+    /* display: flex; */
+    text-align: center;
+}
+
+.card {
+    box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
+    /* max-width: 124px; */
+    /* text-align: center; */
+    height: 100px;
+    margin: 12px;
+    transition: 0.15s all ease-in-out;
+    padding-bottom: 5px;
+}
+img {
+    height: 100px;
+}
 small {
-    font-size: 12px;
+    font-size: 10px;
     padding: 4px;
 }
 </style>
