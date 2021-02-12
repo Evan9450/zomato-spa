@@ -9,13 +9,17 @@
             <div v-if="filterResult.length > 0">
                 <div :class="$style.card" v-for="res in filterResult" :key="res.restaurant.id">
                     <img v-bind:src="res.restaurant.thumb" />
-                    {{ res.restaurant.name }}
-                    <small>{{ res.restaurant.cuisines }}</small>
-                    <!-- <hr /> -->
+                    <div :class="$style.textWrapper">
+                        <p>{{ res.restaurant.name }}</p>
+
+                        <p :class="$style.subTitle">
+                            {{ res.restaurant.cuisines }}
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div v-else class="wrapper">
-                <div :class="$style.card" v-for="(res, index) in dataShow" :key="index" v-bind:dataShow="dataShow" v-bind:currentPage="currentPage">
+            <div v-if="list.length > 0" class="wrapper">
+                <div :class="$style.card" v-for="res in dataShow" :key="res.restaurant.id" v-bind:dataShow="dataShow" v-bind:currentPage="currentPage">
                     <img v-bind:src="res.restaurant.thumb" />
                     <div :class="$style.textWrapper">
                         <p>{{ res.restaurant.name }}</p>
@@ -24,15 +28,18 @@
                             {{ res.restaurant.cuisines }}
                         </p>
                     </div>
-                    <!-- <hr /> -->
                 </div>
             </div>
             <div v-if="searchData.length > 0">
-                <div :class="$style.card" v-for="res in searchData" :key="res.restaurant.id">
+                <div :class="$style.card" v-for="res in dataShow" :key="res.restaurant.id" v-bind:dataShow="dataShow" v-bind:currentPage="currentPage">
                     <img v-bind:src="res.restaurant.thumb" />
-                    {{ res.restaurant.name }}
-                    <small>{{ res.restaurant.cuisines }}</small>
-                    <!-- <hr /> -->
+                    <div :class="$style.textWrapper">
+                        <p>{{ res.restaurant.name }}</p>
+
+                        <p :class="$style.subTitle">
+                            {{ res.restaurant.cuisines }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,7 +48,7 @@
             v-bind:dataShow="dataShow"
             v-on:page:update="updatePages"
             v-bind:currentPage="currentPage"
-            v-bind:pageSize="pageSize"
+            v-bind:pageSize="4"
             v-if="totalPages() > 0"
             class="pagination-wrapper"
         >
@@ -75,7 +82,7 @@ export default {
             // display current data
             dataShow: [],
             // defualt page
-            currentPage: 0
+            currentPage: 0,
         };
     },
     beforeMount() {
@@ -93,7 +100,7 @@ export default {
                 method: 'post',
                 url: 'https://developers.zomato.com/api/v2.1/locations?query=Adelaide',
                 // data: formData,
-                headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
+                headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' },
             })
                 .then(response => {
                     const location = response.data.location_suggestions[0];
@@ -102,19 +109,19 @@ export default {
                     let res_list = axios({
                         method: 'post',
                         url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}`,
-                        headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
+                        headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' },
                     })
-                        .then(function(res) {
+                        .then(function (res) {
                             // console.log(res.data);
                             return res.data.restaurants;
                         })
-                        .catch(function(error) {
+                        .catch(function (error) {
                             console.log('error');
                         });
 
                     return res_list;
                 })
-                .catch(function(response) {});
+                .catch(function (response) {});
             this.list = result;
             this.updateList();
 
@@ -126,23 +133,29 @@ export default {
             console.log(inputValue);
 
             if (this.list) {
-                this.filterResult = this.list.filter(item => {
+                this.list = this.list.filter(item => {
                     const resName = item.restaurant.name.toLowerCase();
                     if (resName.includes(inputValue)) {
                         return item;
                     }
                     // console.log(typeof resName.includes(inputValue));
                 });
+                this.updateList();
             }
         },
 
         async handleSearch() {
-            delete this.list;
+            this.list = [];
+            this.currentPage = 0;
+            this.dataShow = [];
+            this.filterResult = [];
+
+            // console.log('list', this.list.length);
             let result = await axios({
                 method: 'post',
                 url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}&q=${this.search}`,
                 // data: formData,
-                headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
+                headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' },
             })
                 .then(response => {
                     // console.log(response.data.restaurants);
@@ -151,10 +164,11 @@ export default {
                 .catch(res => {
                     console.log(res);
                 });
-            console.log(result);
+            // console.log(result);
             this.search = '';
 
             this.searchData = result;
+            this.updateList();
 
             return this.searchData;
         },
@@ -164,7 +178,15 @@ export default {
             this.updateList();
         },
         updateList() {
-            this.dataShow = this.list.slice(this.currentPage * this.pageSize, this.currentPage * this.pageSize + this.pageSize);
+            if (this.list.length > 0) {
+                this.dataShow = this.list.slice(this.currentPage * this.pageSize, this.currentPage * this.pageSize + this.pageSize);
+            }
+            console.log('update', this.searchData);
+            if (this.searchData.length > 0) {
+                // console.log(this.searchData);
+                this.dataShow = this.searchData.slice(this.currentPage * this.pageSize, this.currentPage * this.pageSize + this.pageSize);
+            }
+            console.log(this.dataShow);
 
             // if we have 0 visible todos, go back a page
             if (this.dataShow.length == 0 && this.currentPage > 0) {
@@ -177,15 +199,20 @@ export default {
 
         totalPages() {
             // console.log(this.list);
-            return Math.ceil(this.list.length / this.pageSize);
+            if (this.list.length > 0) {
+                return Math.ceil(this.list.length / this.pageSize);
+            }
+            if (this.searchData.length > 0) {
+                return Math.ceil(this.searchData.length / this.pageSize);
+            }
         },
         showPreviousLink() {
             return this.currentPage == 0 ? true : false;
         },
         showNextLink() {
             return this.currentPage == this.totalPages() - 1 ? true : false;
-        }
-    }
+        },
+    },
 };
 </script>
 
@@ -230,7 +257,7 @@ body {
     font-size: 10px;
     padding: 4px;
 }
-img {
+.img {
     height: 100px;
 }
 </style>
