@@ -7,7 +7,7 @@
             </div>
 
             <div v-if="filterResult.length > 0">
-                <div :class="$style.card" v-for="(res, index) in filterResult" :key="index">
+                <div :class="$style.card" v-for="res in filterResult" :key="res.restaurant.id">
                     <img v-bind:src="res.restaurant.thumb" />
                     {{ res.restaurant.name }}
                     <small>{{ res.restaurant.cuisines }}</small>
@@ -20,6 +20,14 @@
                     {{ res.restaurant.name }}
                     <small>{{ res.restaurant.cuisines }}</small>
 
+                    <!-- <hr /> -->
+                </div>
+            </div>
+            <div v-if="searchData.length > 0">
+                <div :class="$style.card" v-for="res in searchData" :key="res.restaurant.id">
+                    <img v-bind:src="res.restaurant.thumb" />
+                    {{ res.restaurant.name }}
+                    <small>{{ res.restaurant.cuisines }}</small>
                     <!-- <hr /> -->
                 </div>
             </div>
@@ -66,7 +74,7 @@ export default {
                     this.type = location.entity_type;
                     let res_list = axios({
                         method: 'post',
-                        url: `https://developers.zomato.com/api/v2.1/search?entity_id=${location.entity_id}&entity_type=${location.entity_type}`,
+                        url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}`,
                         headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
                     })
                         .then(function(res) {
@@ -89,16 +97,19 @@ export default {
             const inputValue = e.target.value.toLowerCase();
             console.log(inputValue);
 
-            this.filterResult = this.list.filter(item => {
-                const resName = item.restaurant.name.toLowerCase();
-                if (resName.includes(inputValue)) {
-                    return item;
-                }
-                // console.log(typeof resName.includes(inputValue));
-            });
+            if (this.list) {
+                this.filterResult = this.list.filter(item => {
+                    const resName = item.restaurant.name.toLowerCase();
+                    if (resName.includes(inputValue)) {
+                        return item;
+                    }
+                    // console.log(typeof resName.includes(inputValue));
+                });
+            }
         },
 
         async handleSearch() {
+            delete this.list;
             let result = await axios({
                 method: 'post',
                 url: `https://developers.zomato.com/api/v2.1/search?entity_id=${this.id}&entity_type=${this.type}&q=${this.search}`,
@@ -106,13 +117,18 @@ export default {
                 headers: { 'Content-Type': 'application/json', 'user-key': 'a31bd76da32396a27b6906bf0ca707a2' }
             })
                 .then(response => {
+                    // console.log(response.data.restaurants);
                     return response.data.restaurants;
                 })
                 .catch(res => {
                     console.log(res);
                 });
-            // console.log(result);
-            return (this.list = result);
+            console.log(result);
+            this.search = '';
+
+            this.searchData = result;
+
+            return this.searchData;
         }
     }
 };
@@ -135,6 +151,7 @@ body {
 }
 
 .card {
+    display: flex;
     box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
     /* max-width: 124px; */
     /* text-align: center; */
