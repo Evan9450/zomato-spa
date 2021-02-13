@@ -1,0 +1,59 @@
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.wrapper {
+    /* display: flex; */
+    text-align: center;
+}
+
+.card {
+    display: flex;
+    box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
+    height: 100px;
+    margin: 12px;
+    transition: 0.15s all ease-in-out;
+    /* padding-bottom: 5px; */
+}
+.paginationWrapper {
+    text-align: center;
+}
+.pagination_btn {
+    cursor: pointer;
+    width: 100px;
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid #565656;
+    /* background-color: rgb(34, 155, 253); */
+}
+.textWrapper {
+    flex-direction: column;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.subTitle {
+    display: flex;
+    justify-content: left;
+    font-size: 10px;
+    padding: 4px;
+}
+.img {
+    height: 100px;
+}
+
+.input {
+    width: 300px;
+    height: 30px;
+}
+
+.searchBtn {
+    width: 60px;
+    height: 35px;
+    border: 1px solid #565656;
+    border-radius: 3px;
+}
