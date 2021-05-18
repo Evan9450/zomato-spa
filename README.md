@@ -1,6 +1,6 @@
 # zomato-spa
 
-> A Vue.js project
+> A Vue.js project that allow to show first 20 restaurants with pagination.
 
 ## Build Setup
 
